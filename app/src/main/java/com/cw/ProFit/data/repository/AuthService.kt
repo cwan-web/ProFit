@@ -10,11 +10,4 @@ interface AuthService {
     suspend fun resetPassword(email: String)
     suspend fun getUserProfile(user: UserModel)
     suspend fun logoutUser()
-    fun createSupabaseClient(
-        supabaseUrl: String,
-        supabaseKey: String,
-        function: () -> HttpResponseCache
-    )
-
-    fun install(directory: Any): HttpResponseCache
 }

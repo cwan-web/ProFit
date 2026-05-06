@@ -1,34 +1,33 @@
 package com.cw.ProFit.data.repository
 
 
-import android.R.attr.password
-import android.net.http.HttpResponseCache.install
-import androidx.compose.ui.text.input.KeyboardType.Companion.Email
 import com.cw.ProFit.data.models.UserModel
-import com.google.android.gms.auth.api.Auth
-import java.sql.DriverManager.println
+import io.github.jan.supabase.auth.Auth
+import io.github.jan.supabase.auth.auth
+import io.github.jan.supabase.auth.providers.builtin.Email
+import io.github.jan.supabase.createSupabaseClient
+import io.github.jan.supabase.postgrest.Postgrest
 
 class AuthRepository: AuthService {
     val supabase = createSupabaseClient(
-            supabaseUrl = "https://gkaobjeuqrvzozuhujku.supabase.co",
-            supabaseKey = "sb_publishable_AkttR3tZtoKy_huZb0ox4g_2KDpxwoJ"
-         ) {
-           install(Postgrest)
-        }
+        supabaseUrl = "https://zjejqqbhmdtsmsdsjvjy.supabase.co/rest/v1/",
+        supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpqZWpxcWJobWR0c21zZHNqdmp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4NjAyOTcsImV4cCI6MjA5MzQzNjI5N30.kBGgcJY0MEgB9ulGgJMDfaPH_eZz36DhNHRQ5gkXsR4"
+    )  {
+        install(Postgrest)
+        install(Auth)
+    }
 
 
-    override suspend fun registerUser(userDetails: UserModel)  {
-        supabase.auth.signUpWith(Email) {
-            email = userDetails.email
-            password = userDetails.password
-        }
+
+    override suspend fun registerUser(user: UserModel) {
+       supabase.auth.signUpWith(Email){
+           email = user.email
+           password = user.password
+       }
     }
 
     override suspend fun loginUser(userDetails: UserModel)  {
-        val user = supabase.auth.signInWith(Email) {
-            email = userDetails.email
-            password = userDetails.password
-        }
+
     }
 
     override suspend fun resetPassword(email: String) {
@@ -42,5 +41,8 @@ class AuthRepository: AuthService {
     override suspend fun logoutUser() {
         supabase.auth.signOut()
     }
+
+
+
 
 }

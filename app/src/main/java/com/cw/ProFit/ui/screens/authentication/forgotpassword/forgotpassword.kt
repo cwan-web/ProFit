@@ -124,7 +124,7 @@ fun ForgotPaswordScreen(modifier: Modifier) {
             onValueChange = { passwordInput = it },
             leadingIcon = {
                 Icon(
-                    imageVector = ImageVector.vectorResource(id = R.drawable.outline_password_24),
+                    imageVector = ImageVector.vectorResource(id = R.drawable.outline_password_2_24),
                     contentDescription = "Password",
                     tint = primaryColor
                 )
@@ -245,6 +245,6 @@ fun ForgotPaswordScreen(modifier: Modifier) {
 
 @Composable
 fun LottieAnimationWidget(x0: Int, x1: Dp) {
-    TODO("Not yet implemented")
+    TODO("")
 }
 

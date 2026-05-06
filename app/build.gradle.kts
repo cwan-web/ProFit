@@ -40,7 +40,37 @@ android {
 }
 
 dependencies {
-    implementation(libs.supabase.kt)
+
+//    implementation(platform(libs.bom))
+//    implementation(libs.github.postgrest.kt)
+//    implementation(libs.github.auth.kt)
+//    implementation(libs.supabase.realtime.kt)
+//    implementation(libs.github.storage.kt)
+
+
+    implementation(platform("io.github.jan-tennert.supabase:bom:3.2.2"))
+    implementation("io.github.jan-tennert.supabase:postgrest-kt")
+    implementation("io.github.jan-tennert.supabase:auth-kt")
+    implementation("io.github.jan-tennert.supabase:realtime-kt")
+    implementation("io.github.jan-tennert.supabase:storage-kt")
+//ktor
+
+    implementation(libs.ktor.client.android)
+    //usermodel
+    implementation(libs.retrofit)
+    //nav
+    implementation(libs.androidx.navigation.compose)
+//icon
+    implementation(libs.androidx.compose.material.icons.extended)
+
+
+//    implementation(libs.postgrest.kt)
+//    implementation(libs.supabase.auth.kt)
+//    implementation(libs.realtime.kt)
+//    implementation(libs.supabase.storage.kt)
+
+    implementation(libs.androidx.navigation.compose)
+//    implementation(libs.supabase.kt)
     implementation(libs.lottie.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
