@@ -10,8 +10,8 @@ import io.github.jan.supabase.postgrest.Postgrest
 
 class AuthRepository: AuthService {
     val supabase = createSupabaseClient(
-        supabaseUrl = "https://zjejqqbhmdtsmsdsjvjy.supabase.co/rest/v1/",
-        supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpqZWpxcWJobWR0c21zZHNqdmp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4NjAyOTcsImV4cCI6MjA5MzQzNjI5N30.kBGgcJY0MEgB9ulGgJMDfaPH_eZz36DhNHRQ5gkXsR4"
+        supabaseUrl = "https://zjejqqbhmdtsmsdsjvjy.supabase.co,",
+        supabaseKey = "sb_publishable_lhOscPBscvFghcb-0xbO7w_8mt6ZNpW"
     )  {
         install(Postgrest)
         install(Auth)
@@ -22,7 +22,7 @@ class AuthRepository: AuthService {
     override suspend fun registerUser(user: UserModel) {
        supabase.auth.signUpWith(Email){
            email = user.email
-           password = user.password
+           this.password
        }
     }
 

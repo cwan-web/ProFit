@@ -235,7 +235,7 @@ fun ForgotPaswordScreen(modifier: Modifier) {
         //row
         Row() {
 
-            Text(text = "???!")
+            Text(text = "")
 
 
 
