@@ -13,19 +13,40 @@ class ForgotPasswordViewModel : ViewModel() {
     private val _uiState = MutableStateFlow<ForgotPasswordUiState>(ForgotPasswordUiState.Idle)
     val uiState: StateFlow<ForgotPasswordUiState> = _uiState
 
+    private var currentEmail: String = ""
+
     fun sendResetEmail(email: String) {
         if (email.isBlank()) {
             _uiState.value = ForgotPasswordUiState.Error("Please enter your email")
+            return
+        }
+        currentEmail = email
+
+        viewModelScope.launch {
+            _uiState.value = ForgotPasswordUiState.Loading
+            try {
+                repository.resetPassword(email)
+                _uiState.value = ForgotPasswordUiState.CodeSent
+            } catch (e: Exception) {
+                _uiState.value = ForgotPasswordUiState.Error(e.message ?: "An error occurred")
+            }
+        }
+    }
+
+    fun verifyCode(code: String, onNavigateToHome: () -> Unit) {
+        if (code.isBlank()) {
+            _uiState.value = ForgotPasswordUiState.Error("Please enter the code")
             return
         }
 
         viewModelScope.launch {
             _uiState.value = ForgotPasswordUiState.Loading
             try {
-                repository.resetPassword(email)
+                repository.verifyOtp(currentEmail, code)
                 _uiState.value = ForgotPasswordUiState.Success
+                onNavigateToHome()
             } catch (e: Exception) {
-                _uiState.value = ForgotPasswordUiState.Error(e.message ?: "An error occurred")
+                _uiState.value = ForgotPasswordUiState.Error(e.message ?: "Invalid code")
             }
         }
     }
@@ -34,6 +55,7 @@ class ForgotPasswordViewModel : ViewModel() {
 sealed class ForgotPasswordUiState {
     object Idle : ForgotPasswordUiState()
     object Loading : ForgotPasswordUiState()
+    object CodeSent : ForgotPasswordUiState()
     object Success : ForgotPasswordUiState()
     data class Error(val message: String) : ForgotPasswordUiState()
 }

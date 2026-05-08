@@ -31,12 +31,13 @@ class AuthRepository: AuthService {
         }
     }
 
-    suspend fun verifyOtp(email: String, token: String) {
-        supabase.auth.verifyWith(OTP) {
-            this.email = email
-            this.token = token
-            this.type = OtpType.Email
-        }
+    override suspend fun verifyOtp(email: String, token: String) {
+        // Using a safe way to get the enum value if possible
+        supabase.auth.verifyEmailOtp(
+            type = OtpType.Email.valueOf("EMAIL"),
+            email = email,
+            token = token
+        )
     }
 
     override suspend fun getUserProfile(user: UserModel) {

@@ -1,53 +1,42 @@
 package com.cw.ProFit.ui.screens.authentication.forgotpassword
 
-import android.R.attr.maxLines
-import android.R.attr.shape
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Email
+import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.foundation.clickable
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Email
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.graphics.Color
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Text
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
@@ -59,10 +48,9 @@ import com.cw.ProFit.ui.theme.secondaryColor
 
 
 @Composable
-fun ForgotPasswordScreen(onBack: () -> Unit, modifier: Modifier = Modifier, viewModel: ForgotPasswordViewModel = viewModel()) {
-    //text Input
-
+fun ForgotPasswordScreen(onBack: () -> Unit, onNavigateToHome: () -> Unit, modifier: Modifier = Modifier, viewModel: ForgotPasswordViewModel = viewModel()) {
     var emailInput by remember { mutableStateOf(TextFieldValue("")) }
+    var codeInput by remember { mutableStateOf(TextFieldValue("")) }
     val uiState by viewModel.uiState.collectAsState()
 
     Column(
@@ -73,11 +61,8 @@ fun ForgotPasswordScreen(onBack: () -> Unit, modifier: Modifier = Modifier, view
             .padding(16.dp)
     ) {
 
-        //lottie aniamtion
-        LottieAnimationWidget(R.raw.authlogin, 300.dp)
+        LottieAnimationWidget(R.raw.authlogin, 250.dp)
 
-
-        // sIGNuP MESSAGE
         Text(
             text = "Forgot password?",
             style = TextStyle(
@@ -89,7 +74,10 @@ fun ForgotPasswordScreen(onBack: () -> Unit, modifier: Modifier = Modifier, view
         Spacer(modifier = Modifier.height(8.dp))
         
         Text(
-            text = "Enter your email to receive a password reset link",
+            text = if (uiState is ForgotPasswordUiState.CodeSent) 
+                "Enter the 6-digit code sent to your email" 
+            else 
+                "Enter your email to receive a login code",
             style = TextStyle(
                 fontSize = 16.sp,
                 color = Color.Gray
@@ -98,30 +86,53 @@ fun ForgotPasswordScreen(onBack: () -> Unit, modifier: Modifier = Modifier, view
         
         Spacer(modifier = Modifier.height(24.dp))
 
-        //emailinput
-        OutlinedTextField(
-            value = emailInput,
-            onValueChange = { emailInput = it },
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Outlined.Email,
-                    contentDescription = "Email",
-                    tint = primaryColor
-                )
-            },
-            placeholder = {
-                Text(text = "eg. user@gmail.com")
-            },
-            label = { Text("Email Address") },
-            maxLines = 1,
-            shape = RoundedCornerShape(24.dp),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = secondaryColor,
-                unfocusedBorderColor = primaryColor
-            ),
-            modifier = Modifier.fillMaxWidth()
-        )
+        if (uiState is ForgotPasswordUiState.CodeSent) {
+            // OTP Code Input
+            OutlinedTextField(
+                value = codeInput,
+                onValueChange = { codeInput = it },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Outlined.Lock,
+                        contentDescription = "Code",
+                        tint = primaryColor
+                    )
+                },
+                placeholder = { Text(text = "123456") },
+                label = { Text("6-Digit Code") },
+                maxLines = 1,
+                shape = RoundedCornerShape(24.dp),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = secondaryColor,
+                    unfocusedBorderColor = primaryColor
+                ),
+                modifier = Modifier.fillMaxWidth()
+            )
+        } else {
+            // Email Input
+            OutlinedTextField(
+                value = emailInput,
+                onValueChange = { emailInput = it },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Outlined.Email,
+                        contentDescription = "Email",
+                        tint = primaryColor
+                    )
+                },
+                placeholder = { Text(text = "user@gmail.com") },
+                label = { Text("Email Address") },
+                maxLines = 1,
+                shape = RoundedCornerShape(24.dp),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = secondaryColor,
+                    unfocusedBorderColor = primaryColor
+                ),
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
         
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -133,17 +144,14 @@ fun ForgotPasswordScreen(onBack: () -> Unit, modifier: Modifier = Modifier, view
             )
         }
 
-        if (uiState is ForgotPasswordUiState.Success) {
-            Text(
-                text = "Instructions sent! Check your email.",
-                color = Color.Green,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-        }
-
-        //button
         OutlinedButton(
-            onClick = { viewModel.sendResetEmail(emailInput.text) },
+            onClick = { 
+                if (uiState is ForgotPasswordUiState.CodeSent) {
+                    viewModel.verifyCode(codeInput.text, onNavigateToHome)
+                } else {
+                    viewModel.sendResetEmail(emailInput.text)
+                }
+            },
             enabled = uiState !is ForgotPasswordUiState.Loading,
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(24.dp)
@@ -152,7 +160,7 @@ fun ForgotPasswordScreen(onBack: () -> Unit, modifier: Modifier = Modifier, view
                 CircularProgressIndicator(modifier = Modifier.size(24.dp), color = primaryColor)
             } else {
                 Text(
-                    "Send Reset Link",
+                    text = if (uiState is ForgotPasswordUiState.CodeSent) "Verify & Login" else "Send Code",
                     modifier = Modifier.padding(vertical = 8.dp)
                 )
             }
@@ -169,8 +177,6 @@ fun ForgotPasswordScreen(onBack: () -> Unit, modifier: Modifier = Modifier, view
     }
 }
 
-
-
 @Composable
 fun LottieAnimationWidget(x0: Int, x1: Dp) {
     val composition by
@@ -185,4 +191,3 @@ fun LottieAnimationWidget(x0: Int, x1: Dp) {
         modifier = Modifier.size(x1)
     )
 }
-

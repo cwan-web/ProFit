@@ -75,7 +75,12 @@ fun AppNavigation(
 
         composable(route = "forgotpassword") {
             ForgotPasswordScreen(
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                onNavigateToHome = {
+                    navController.navigate("home") {
+                        popUpTo("forgotpassword") { inclusive = true }
+                    }
+                }
             )
         }
 
