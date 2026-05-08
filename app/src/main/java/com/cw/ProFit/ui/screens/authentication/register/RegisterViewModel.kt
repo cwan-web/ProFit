@@ -14,13 +14,14 @@ sealed class RegisterUiState(
     val error: String? = null
 )
 
-class RegisterViewModel : ViewModel() {
+class RegisterViewModel(_isLoading: Any) : ViewModel() {
 
     val authRepository = AuthRepository()
 
     //     state
+
     private var _isLoading = MutableStateFlow(false)
-    val isLoading = _isLoading.asStateFlow()
+    val isLoading = _isLoading.toString()
 
     private var _message = MutableStateFlow("")
     val message = _message.asStateFlow()

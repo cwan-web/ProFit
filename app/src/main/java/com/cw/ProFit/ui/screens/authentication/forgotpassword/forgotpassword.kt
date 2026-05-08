@@ -14,8 +14,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.TextFieldValue
-import android.R.attr.text
-import android.provider.ContactsContract
+import androidx.compose.foundation.clickable
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Email
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.graphics.Color
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -43,26 +48,29 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.cw.ProFit.R
 import com.cw.ProFit.ui.theme.primaryColor
 import com.cw.ProFit.ui.theme.secondaryColor
 
 
 @Composable
-fun ForgotPaswordScreen(modifier: Modifier) {
+fun ForgotPasswordScreen(onBack: () -> Unit, modifier: Modifier = Modifier, viewModel: ForgotPasswordViewModel = viewModel()) {
     //text Input
 
     var emailInput by remember { mutableStateOf(TextFieldValue("")) }
-    var passwordInput by remember { mutableStateOf(TextFieldValue("")) }
-    var isVisible by remember { mutableStateOf(false) }
-    var userName  by remember { mutableStateOf(TextFieldValue(""))}
+    val uiState by viewModel.uiState.collectAsState()
 
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
             .fillMaxSize()
-
+            .padding(16.dp)
     ) {
 
         //lottie aniamtion
@@ -78,173 +86,103 @@ fun ForgotPaswordScreen(modifier: Modifier) {
                 color = primaryColor
             )
         )
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        Text(
+            text = "Enter your email to receive a password reset link",
+            style = TextStyle(
+                fontSize = 16.sp,
+                color = Color.Gray
+            )
+        )
+        
         Spacer(modifier = Modifier.height(24.dp))
-        //username
-        // OutlinedTextField(
-        //  value = userName,
-        //onValueChange = { userName = it },
-        //label = { Text("userName")}
-
-        // )
-
-
-
-
-
 
         //emailinput
-        //OutlinedTextField(
-        //  value = emailInput,
-        //  onValueChange = { emailInput = it },
-        //  leadingIcon = {
-        //    Icon(
-        // imageVector = Icons.Outlined.Email,
-        //  contentDescription = "Email",
-        // tint = primaryColor
-        //  )
-        //},
-        //placeholder = {
-        //   Text(text = "eg. gh@gmail.com")
-        //},
-        //maxLines = 1,
-        //shape = RoundedCornerShape(24.dp),
-        //keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-        //colors = OutlinedTextFieldDefaults.colors(
-        //    focusedBorderColor = secondaryColor,
-        //   unfocusedBorderColor = primaryColor
-        // ),
-        // modifier = Modifier.fillMaxWidth()
-        // )
-        Spacer(modifier = Modifier.height(24.dp))
-
-        //password input
-
         OutlinedTextField(
-            value = passwordInput,
-            onValueChange = { passwordInput = it },
+            value = emailInput,
+            onValueChange = { emailInput = it },
             leadingIcon = {
                 Icon(
-                    imageVector = ImageVector.vectorResource(id = R.drawable.outline_password_2_24),
-                    contentDescription = "Password",
+                    imageVector = Icons.Outlined.Email,
+                    contentDescription = "Email",
                     tint = primaryColor
                 )
             },
-            label = {
-                Text(text = "Password")
+            placeholder = {
+                Text(text = "eg. user@gmail.com")
             },
-            visualTransformation = if (isVisible) {
-                VisualTransformation.None
-
-            } else {
-                PasswordVisualTransformation()
-            },
-
-
-            trailingIcon = {
-                IconButton(
-                    onClick = { var isViisble = !isVisible }
-                ) {
-                    if (isVisible) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(R.drawable.outline_visibility_24),
-                            contentDescription = "Password"
-                        )
-                    } else {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(R.drawable.outline_visibility_off_24),
-                            contentDescription = "Password"
-                        )
-                    }
-
-                }
-            },
+            label = { Text("Email Address") },
             maxLines = 1,
             shape = RoundedCornerShape(24.dp),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = secondaryColor,
                 unfocusedBorderColor = primaryColor
             ),
             modifier = Modifier.fillMaxWidth()
-
         )
+        
         Spacer(modifier = Modifier.height(24.dp))
 
-        //enter password again
-        OutlinedTextField(
-            value = passwordInput,
-            onValueChange = { passwordInput = it },
-            leadingIcon = {
-                Icon(
-                    imageVector = ImageVector.vectorResource(id = R.drawable.outline_visibility_24),
-                    contentDescription = "Password again",
-                    tint = primaryColor
-                )
-            },
-            label = {
-                Text(text = "Password again")
-            },
-            visualTransformation = if (isVisible) {
-                VisualTransformation.None
+        if (uiState is ForgotPasswordUiState.Error) {
+            Text(
+                text = (uiState as ForgotPasswordUiState.Error).message,
+                color = Color.Red,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+        }
 
-            } else {
-                PasswordVisualTransformation()
-            },
-
-
-            trailingIcon = {
-                IconButton(
-                    onClick = { var isViisble = !isVisible }
-                ) {
-                    if (isVisible) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(R.drawable.outline_visibility_24),
-                            contentDescription = "Password"
-                        )
-                    } else {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(R.drawable.outline_visibility_off_24),
-                            contentDescription = "Password"
-                        )
-                    }
-
-                }
-            },
-            maxLines = 1,
-            shape = RoundedCornerShape(24.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = secondaryColor,
-                unfocusedBorderColor = primaryColor
-            ),
-            modifier = Modifier.fillMaxWidth()
-
-        )
-        Spacer(modifier = Modifier.height(24.dp))
-
+        if (uiState is ForgotPasswordUiState.Success) {
+            Text(
+                text = "Instructions sent! Check your email.",
+                color = Color.Green,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+        }
 
         //button
         OutlinedButton(
-            onClick = { }
+            onClick = { viewModel.sendResetEmail(emailInput.text) },
+            enabled = uiState !is ForgotPasswordUiState.Loading,
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(24.dp)
+        ) {
+            if (uiState is ForgotPasswordUiState.Loading) {
+                CircularProgressIndicator(modifier = Modifier.size(24.dp), color = primaryColor)
+            } else {
+                Text(
+                    "Send Reset Link",
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        Text(
+            text = "Back to Login",
+            modifier = Modifier.clickable { onBack() },
+            color = primaryColor,
+            fontWeight = FontWeight.Medium
         )
-        {
-            Text(
-                "Enter",
-                modifier = Modifier.padding(horizontal = 24.dp)
-            )
-        }
-        Spacer(modifier = Modifier.height(24.dp))
-        //row
-        Row() {
-
-            Text(text = "")
-
-
-
-        }
     }
 }
 
+
+
 @Composable
 fun LottieAnimationWidget(x0: Int, x1: Dp) {
-    TODO("")
+    val composition by
+    rememberLottieComposition(LottieCompositionSpec.RawRes(x0))
+    val progress by animateLottieCompositionAsState(
+        composition,
+        iterations = LottieConstants.IterateForever
+    )
+    LottieAnimation(
+        composition = composition,
+        progress = { progress },
+        modifier = Modifier.size(x1)
+    )
 }
 

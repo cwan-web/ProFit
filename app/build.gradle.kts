@@ -42,7 +42,14 @@ android {
 
 dependencies {
 
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.10.0")
+    implementation(libs.androidx.compose.material3.v121)
+    implementation(libs.androidx.compose.runtime)
+    implementation(libs.androidx.core.splashscreen)
+
+
+
+
+    implementation(libs.kotlinx.serialization.json)
 //    implementation(platform(libs.bom))
 //    implementation(libs.github.postgrest.kt)
 //    implementation(libs.github.auth.kt)

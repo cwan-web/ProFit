@@ -1,5 +1,6 @@
 package com.cw.ProFit.ui.screens.authentication.login
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -8,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -44,7 +46,8 @@ import com.cw.ProFit.ui.theme.secondaryColor
 
 
 @Composable
-fun LoginScreen(modifier: Modifier) {
+fun LoginScreen(onNavigateToRegister : () -> Unit, onNavigateToForgotPassword: () -> Unit, onLoginSuccess: () -> Unit,
+                modifier: Modifier =Modifier) {
     //text Input
     var emailInput by remember { mutableStateOf(TextFieldValue("")) }
     var passwordInput by remember { mutableStateOf(TextFieldValue("")) }
@@ -123,17 +126,17 @@ fun LoginScreen(modifier: Modifier) {
 
             trailingIcon = {
                 IconButton(
-                    onClick = { var isViisble = !isVisible }
+                    onClick = { isVisible = !isVisible }
                 ) {
                     if (isVisible) {
                         Icon(
                             imageVector = ImageVector.vectorResource(R.drawable.outline_visibility_24),
-                            contentDescription = "Password"
+                            contentDescription = "Hide Password"
                         )
                     } else {
                         Icon(
                             imageVector = ImageVector.vectorResource(R.drawable.outline_visibility_off_24),
-                            contentDescription = "Password"
+                            contentDescription = "Show Password"
                         )
                     }
 
@@ -151,11 +154,11 @@ fun LoginScreen(modifier: Modifier) {
         Spacer(modifier = Modifier.height(24.dp))
         //button
         OutlinedButton(
-            onClick = { }
+            onClick = { onLoginSuccess() }
         )
         {
             Text(
-                "Sign in",
+                "Log In",
                 modifier = Modifier.padding(horizontal = 24.dp)
             )
         }
@@ -163,9 +166,13 @@ fun LoginScreen(modifier: Modifier) {
         //row
         Row() {
 
-            Text(text = "Forgot Password")
+            Text(text = "Forgot Password",
+                modifier = Modifier.clickable{ onNavigateToForgotPassword() })
 
-            Text(text = "No account?")
+            Spacer(modifier = Modifier.width(24.dp))
+
+            Text(text = "No account?",
+                modifier =Modifier.clickable{ onNavigateToRegister() })
 
         }
     }

@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.TextFieldValue
 import android.R.attr.text
 import android.provider.ContactsContract
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -60,7 +61,7 @@ import androidx.compose.ui.unit.sp
 
 
 @Composable
-fun RegisterScreen(modifier: Modifier) {
+fun RegisterScreen(onNavigateToLogin : () -> Unit, onRegisterSuccess: () -> Unit, modifier: Modifier = Modifier) {
     //text Input
     var emailInput by remember { mutableStateOf(TextFieldValue("")) }
     var passwordInput by remember { mutableStateOf(TextFieldValue("")) }
@@ -68,6 +69,7 @@ fun RegisterScreen(modifier: Modifier) {
     var userName  by remember { mutableStateOf(TextFieldValue(""))}
 
     Column(
+
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
@@ -77,6 +79,8 @@ fun RegisterScreen(modifier: Modifier) {
 
         //lottie aniamtion
         LottieAnimationWidget(R.raw.mandoingdumbellcurls, 300.dp)
+
+        Text(text = "Already have an account? Sign In ",modifier = Modifier.clickable{ onNavigateToLogin()})
 
 
         // sIGNuP MESSAGE

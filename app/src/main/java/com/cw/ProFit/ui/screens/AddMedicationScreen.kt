@@ -8,13 +8,16 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
+import androidx.lifecycle.viewmodel.compose.viewModel
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddMedicationScreen(onBack: () -> Unit) {
+fun AddMedicationScreen(onBack: () -> Unit, viewModel: AddMedicationViewModel = viewModel()) {
     // These variables store what the user types
     var name by remember { mutableStateOf("") }
     var category by remember { mutableStateOf("") }
     var dosage by remember { mutableStateOf("") }
+    var isSaving by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -64,12 +67,24 @@ fun AddMedicationScreen(onBack: () -> Unit) {
             // Save Button
             Button(
                 onClick = {
-                    /* We will add the save logic to Supabase here next! */
+                    isSaving = true
+                    viewModel.addMedication(name, category, dosage) {
+                        isSaving = false
+                        onBack()
+                    }
                 },
                 modifier = Modifier.fillMaxWidth(),
-                enabled = name.isNotBlank() && dosage.isNotBlank()
+                enabled = name.isNotBlank() && dosage.isNotBlank() && !isSaving
             ) {
-                Text("Save Medication")
+                if (isSaving) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Text("Save Medication")
+                }
             }
         }
     }

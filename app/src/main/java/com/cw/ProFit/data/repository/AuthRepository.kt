@@ -1,48 +1,49 @@
 package com.cw.ProFit.data.repository
 
-
-import com.cw.ProFit.data.models.UserModel
-import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.builtin.Email
-import io.github.jan.supabase.createSupabaseClient
-import io.github.jan.supabase.postgrest.Postgrest
+import io.github.jan.supabase.auth.providers.builtin.OTP
+import io.github.jan.supabase.auth.OtpType
+import com.cw.ProFit.data.models.UserModel
+import com.cw.ProFit.data.SupabaseProvider
 
 class AuthRepository: AuthService {
-    val supabase = createSupabaseClient(
-        supabaseUrl = "https://zjejqqbhmdtsmsdsjvjy.supabase.co,",
-        supabaseKey = "sb_publishable_lhOscPBscvFghcb-0xbO7w_8mt6ZNpW"
-    )  {
-        install(Postgrest)
-        install(Auth)
-    }
-
-
+    val supabase = SupabaseProvider.client
 
     override suspend fun registerUser(user: UserModel) {
-       supabase.auth.signUpWith(Email){
-           email = user.email
-           this.password
-       }
+        supabase.auth.signUpWith(Email) {
+            email = user.email
+            password = user.password
+        }
     }
 
-    override suspend fun loginUser(userDetails: UserModel)  {
-
+    override suspend fun loginUser(userDetails: UserModel) {
+        supabase.auth.signInWith(Email) {
+            email = userDetails.email
+            password = userDetails.password
+        }
     }
 
     override suspend fun resetPassword(email: String) {
-        supabase.auth.resetPasswordForEmail(email = email)
+        // Sends an OTP code to the email
+        supabase.auth.signInWith(OTP) {
+            this.email = email
+        }
+    }
+
+    suspend fun verifyOtp(email: String, token: String) {
+        supabase.auth.verifyWith(OTP) {
+            this.email = email
+            this.token = token
+            this.type = OtpType.Email
+        }
     }
 
     override suspend fun getUserProfile(user: UserModel) {
-//        TODO("Not yet implemented")
+        // Implementation for profile
     }
 
     override suspend fun logoutUser() {
         supabase.auth.signOut()
     }
-
-
-
-
 }

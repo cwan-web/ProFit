@@ -4,10 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class UserModel(
-    val email:String = "",
+    val email: String = "",
     val id: String? = null,
-   // val password: String = ""
-
-
+    val password: String = ""
 )
-
