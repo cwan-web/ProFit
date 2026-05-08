@@ -5,9 +5,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -17,7 +18,9 @@ fun AddMedicationScreen(onBack: () -> Unit, viewModel: AddMedicationViewModel = 
     var name by remember { mutableStateOf("") }
     var category by remember { mutableStateOf("") }
     var dosage by remember { mutableStateOf("") }
-    var isSaving by remember { mutableStateOf(false) }
+    
+    val isSaving by viewModel.isSaving.collectAsState()
+    val errorMessage by viewModel.errorMessage.collectAsState()
 
     Scaffold(
         topBar = {
@@ -36,14 +39,16 @@ fun AddMedicationScreen(onBack: () -> Unit, viewModel: AddMedicationViewModel = 
                 .padding(innerPadding)
                 .padding(16.dp)
                 .fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // Input for Medication Name
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
                 label = { Text("Medication Name") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !isSaving
             )
 
             // Input for Category
@@ -51,7 +56,8 @@ fun AddMedicationScreen(onBack: () -> Unit, viewModel: AddMedicationViewModel = 
                 value = category,
                 onValueChange = { category = it },
                 label = { Text("Category (e.g. Supplement, Pill)") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !isSaving
             )
 
             // Input for Dosage
@@ -59,17 +65,20 @@ fun AddMedicationScreen(onBack: () -> Unit, viewModel: AddMedicationViewModel = 
                 value = dosage,
                 onValueChange = { dosage = it },
                 label = { Text("Dosage (e.g. 500mg)") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !isSaving
             )
+
+            errorMessage?.let {
+                Text(text = it, color = Color.Red, modifier = Modifier.padding(top = 8.dp))
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
             // Save Button
             Button(
                 onClick = {
-                    isSaving = true
                     viewModel.addMedication(name, category, dosage) {
-                        isSaving = false
                         onBack()
                     }
                 },
