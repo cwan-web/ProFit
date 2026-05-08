@@ -9,6 +9,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
+import kotlinx.coroutines.withTimeout
+
 class AddMedicationViewModel : ViewModel() {
     private val repository = MedicineRepository(SupabaseProvider.client)
 
@@ -19,7 +21,10 @@ class AddMedicationViewModel : ViewModel() {
     val errorMessage: StateFlow<String?> = _errorMessage
 
     fun addMedication(name: String, category: String, dosage: String, onComplete: () -> Unit) {
-        if (name.isBlank() || dosage.isBlank()) {
+        val trimmedName = name.trim()
+        val trimmedDosage = dosage.trim()
+        
+        if (trimmedName.isBlank() || trimmedDosage.isBlank()) {
             _errorMessage.value = "Name and dosage are required"
             return
         }
@@ -28,17 +33,19 @@ class AddMedicationViewModel : ViewModel() {
             _isSaving.value = true
             _errorMessage.value = null
             try {
-                val medication = MedicationModel(
-                    name = name,
-                    category = category,
-                    defaultDosage = dosage
-                )
-                repository.addMedication(medication)
+                withTimeout(15000) { // 15 second timeout
+                    val medication = MedicationModel(
+                        name = trimmedName,
+                        category = category.trim(),
+                        defaultDosage = trimmedDosage
+                    )
+                    repository.addMedication(medication)
+                }
                 _isSaving.value = false
                 onComplete()
             } catch (e: Exception) {
                 _isSaving.value = false
-                _errorMessage.value = "Failed to save: ${e.message}"
+                _errorMessage.value = "Error: ${e.localizedMessage ?: "Connection failed"}"
                 e.printStackTrace()
             }
         }

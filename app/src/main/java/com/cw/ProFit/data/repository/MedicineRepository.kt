@@ -14,7 +14,8 @@ class MedicineRepository (private
     }
 
     suspend fun addMedication(medication: MedicationModel) {
-        supabase.from("medications").insert(medication)
+        // Explicitly inserting as a single item list often avoids issues with some versions of Postgrest-kt
+        supabase.from("medications").insert(listOf(medication))
     }
 
 
