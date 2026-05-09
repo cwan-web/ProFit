@@ -9,28 +9,18 @@ import io.github.jan.supabase.storage.storage
 class MedicineRepository(private val supabase: SupabaseClient) {
     
     suspend fun getMedications(): List<MedicationModel> {
-        // Try getting the user ID
-        val userId = supabase.auth.currentUserOrNull()?.id
-        if (userId == null) {
-            println("MedicineRepository: No user logged in")
-            return emptyList()
-        }
-
         return try {
-            println("MedicineRepository: Fetching medications for user $userId")
+            println("MedicineRepository: Fetching all medications")
+            // Removed the user_id filter to show all medications in the database
             val result = supabase.postgrest.from("medications")
-                .select {
-                    filter {
-                        eq("user_id", userId)
-                    }
-                }
+                .select()
                 .decodeList<MedicationModel>()
             println("MedicineRepository: Successfully fetched ${result.size} medications")
             result
         } catch (e: Exception) {
             println("MedicineRepository: Error fetching medications: ${e.localizedMessage}")
             e.printStackTrace()
-            throw e // Let the ViewModel handle the error
+            throw e
         }
     }
 
