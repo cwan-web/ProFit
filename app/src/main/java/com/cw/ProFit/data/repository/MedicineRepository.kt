@@ -10,34 +10,29 @@ class MedicineRepository(private val supabase: SupabaseClient) {
     
     suspend fun getMedications(): List<MedicationModel> {
         return try {
-            println("MedicineRepository: Fetching all medications")
-            // Removed the user_id filter to show all medications in the database
-            val result = supabase.postgrest.from("medications")
+            // Fetch all medications from the table
+            supabase.postgrest.from("medications")
                 .select()
                 .decodeList<MedicationModel>()
-            println("MedicineRepository: Successfully fetched ${result.size} medications")
-            result
         } catch (e: Exception) {
-            println("MedicineRepository: Error fetching medications: ${e.localizedMessage}")
             e.printStackTrace()
-            throw e
+            emptyList()
         }
     }
 
     suspend fun addMedication(medication: MedicationModel) {
         try {
             val userId = supabase.auth.currentUserOrNull()?.id
+            // Ensure userId is attached if it's missing
             val medicationToSave = if (medication.userId == null) {
                 medication.copy(userId = userId)
             } else {
                 medication
             }
             
-            println("MedicineRepository: Adding medication: ${medicationToSave.name}")
-            supabase.postgrest.from("medications").insert(medicationToSave)
-            println("MedicineRepository: Successfully added medication")
+            // Insert as a list to ensure compatibility with all Postgrest versions
+            supabase.postgrest.from("medications").insert(listOf(medicationToSave))
         } catch (e: Exception) {
-            println("MedicineRepository: Error adding medication: ${e.localizedMessage}")
             e.printStackTrace()
             throw e
         }
