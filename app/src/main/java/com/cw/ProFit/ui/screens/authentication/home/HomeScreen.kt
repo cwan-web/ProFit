@@ -51,11 +51,21 @@ import androidx.navigation.compose.rememberNavController
 import com.cw.ProFit.data.AuthViewModel
 import com.cw.ProFit.ui.theme.primaryColor
 
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.viewmodel.compose.viewModel
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(navController: NavHostController) {
+fun HomeScreen(navController: NavHostController, homeViewModel: HomeScreenViewModel = viewModel()) {
     val context = LocalContext.current
     val myauth = remember { AuthViewModel(navController, context) }
+    val medications by homeViewModel.medications.collectAsState()
+    var isRecentVisible by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -150,6 +160,7 @@ fun HomeScreen(navController: NavHostController) {
                 myauth.getCurrentUserName {
                     username = it
                 }
+                homeViewModel.fetchMedications()
             }
 
             Text(
@@ -200,7 +211,7 @@ fun HomeScreen(navController: NavHostController) {
                         .fillMaxWidth()
                         .height(100.dp)
                         .clickable {
-                            navController.navigate("home")
+                            navController.navigate("medication_list")
                         },
                     shape = RoundedCornerShape(16.dp),
                     elevation = CardDefaults.cardElevation(8.dp),
@@ -253,7 +264,86 @@ fun HomeScreen(navController: NavHostController) {
                         )
                     }
                 }
+
+                // Recently Added Medication Section
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { isRecentVisible = !isRecentVisible },
+                    shape = RoundedCornerShape(16.dp),
+                    elevation = CardDefaults.cardElevation(8.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color.White,
+                        contentColor = primaryColor
+                    )
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                "Recently added medication",
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = primaryColor
+                            )
+                            Icon(
+                                imageVector = if (isRecentVisible) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                                contentDescription = if (isRecentVisible) "Collapse" else "Expand",
+                                tint = primaryColor
+                            )
+                        }
+
+                        if (isRecentVisible) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            if (medications.isEmpty()) {
+                                Text("No medications recently added.", fontSize = 14.sp, color = Color.Gray)
+                            } else {
+                                // Show up to 3 most recent medications
+                                medications.take(3).forEach { medication ->
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 4.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Column {
+                                            Text(
+                                                text = medication.name,
+                                                fontWeight = FontWeight.SemiBold,
+                                                fontSize = 16.sp
+                                            )
+                                            Text(
+                                                text = "Dosage: ${medication.defaultDosage ?: "N/A"}",
+                                                fontSize = 12.sp,
+                                                color = Color.Gray
+                                            )
+                                        }
+                                    }
+                                    HorizontalDivider(
+                                        modifier = Modifier.padding(vertical = 4.dp),
+                                        thickness = 0.5.dp,
+                                        color = Color.LightGray
+                                    )
+                                }
+                                Text(
+                                    text = "See all",
+                                    color = primaryColor,
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier
+                                        .align(Alignment.End)
+                                        .clickable { navController.navigate("medication_list") }
+                                        .padding(top = 4.dp)
+                                )
+                            }
+                        }
+                    }
+                }
             }
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }

@@ -6,6 +6,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.cw.ProFit.ui.screens.AddMedicationScreen
+import com.cw.ProFit.ui.screens.MedicationListScreen
 import com.cw.ProFit.ui.screens.SplashScreen
 import com.cw.ProFit.ui.screens.authentication.home.HomeScreen
 import com.cw.ProFit.ui.screens.authentication.login.LoginScreen
@@ -71,6 +72,10 @@ fun AppNavigation(
 
         composable(route = "add_medication") {
             AddMedicationScreen(onBack = { navController.popBackStack() })
+        }
+
+        composable(route = "medication_list") {
+            MedicationListScreen(onBack = { navController.popBackStack() })
         }
 
         composable(route = "forgotpassword") {

@@ -2,13 +2,13 @@ package com.cw.ProFit.data.repository
 
 import com.cw.ProFit.data.models.ProfileModel
 import io.github.jan.supabase.SupabaseClient
-import io.github.jan.supabase.postgrest.from
+import io.github.jan.supabase.postgrest.postgrest
 
 class ProfileRepository(private val supabase: SupabaseClient) {
     
     suspend fun getProfile(userId: String): ProfileModel? {
         return try {
-            supabase.from("profiles")
+            supabase.postgrest.from("profiles")
                 .select {
                     filter {
                         eq("id", userId)
@@ -22,6 +22,10 @@ class ProfileRepository(private val supabase: SupabaseClient) {
     }
 
     suspend fun updateProfile(profile: ProfileModel) {
-        supabase.from("profiles").upsert(profile)
+        try {
+            supabase.postgrest.from("profiles").upsert(profile)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 }

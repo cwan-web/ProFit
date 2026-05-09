@@ -1,15 +1,29 @@
 package com.cw.ProFit.ui.screens
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
+import com.cw.ProFit.ui.theme.primaryColor
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -18,7 +32,18 @@ fun AddMedicationScreen(onBack: () -> Unit, viewModel: AddMedicationViewModel = 
     var name by remember { mutableStateOf("") }
     var category by remember { mutableStateOf("") }
     var dosage by remember { mutableStateOf("") }
+    var instructions by remember { mutableStateOf("") }
     
+    // Image selection state
+    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+    val context = LocalContext.current
+    
+    val photoPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        selectedImageUri = uri
+    }
+
     val isSaving by viewModel.isSaving.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
 
@@ -30,7 +55,12 @@ fun AddMedicationScreen(onBack: () -> Unit, viewModel: AddMedicationViewModel = 
                     IconButton(onClick = onBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = primaryColor,
+                    titleContentColor = Color.White,
+                    navigationIconContentColor = Color.White
+                )
             )
         }
     ) { innerPadding ->
@@ -38,10 +68,35 @@ fun AddMedicationScreen(onBack: () -> Unit, viewModel: AddMedicationViewModel = 
             modifier = Modifier
                 .padding(innerPadding)
                 .padding(16.dp)
-                .fillMaxSize(),
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // Image Picker UI
+            Box(
+                modifier = Modifier
+                    .size(150.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .border(2.dp, primaryColor, RoundedCornerShape(12.dp))
+                    .clickable { photoPickerLauncher.launch("image/*") },
+                contentAlignment = Alignment.Center
+            ) {
+                if (selectedImageUri == null) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(Icons.Default.AddAPhoto, contentDescription = null, tint = primaryColor)
+                        Text("Add Photo", color = primaryColor, style = MaterialTheme.typography.labelSmall)
+                    }
+                } else {
+                    AsyncImage(
+                        model = selectedImageUri,
+                        contentDescription = "Selected Image",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                }
+            }
+
             // Input for Medication Name
             OutlinedTextField(
                 value = name,
@@ -69,6 +124,16 @@ fun AddMedicationScreen(onBack: () -> Unit, viewModel: AddMedicationViewModel = 
                 enabled = !isSaving
             )
 
+            // Input for Instructions
+            OutlinedTextField(
+                value = instructions,
+                onValueChange = { instructions = it },
+                label = { Text("Instructions (optional)") },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !isSaving,
+                minLines = 3
+            )
+
             errorMessage?.let {
                 Text(text = it, color = Color.Red, modifier = Modifier.padding(top = 8.dp))
             }
@@ -78,12 +143,20 @@ fun AddMedicationScreen(onBack: () -> Unit, viewModel: AddMedicationViewModel = 
             // Save Button
             Button(
                 onClick = {
-                    viewModel.addMedication(name, category, dosage) {
+                    val imageBytes = selectedImageUri?.let { uri ->
+                        try {
+                            context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
+                        } catch (e: Exception) {
+                            null
+                        }
+                    }
+                    viewModel.addMedication(name, category, dosage, instructions, imageBytes) {
                         onBack()
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
-                enabled = name.isNotBlank() && dosage.isNotBlank() && !isSaving
+                enabled = name.isNotBlank() && dosage.isNotBlank() && !isSaving,
+                colors = ButtonDefaults.buttonColors(containerColor = primaryColor)
             ) {
                 if (isSaving) {
                     CircularProgressIndicator(

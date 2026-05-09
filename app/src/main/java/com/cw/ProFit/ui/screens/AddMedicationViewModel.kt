@@ -8,7 +8,7 @@ import com.cw.ProFit.data.repository.MedicineRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-
+import io.github.jan.supabase.auth.auth
 import kotlinx.coroutines.withTimeout
 
 class AddMedicationViewModel : ViewModel() {
@@ -20,7 +20,14 @@ class AddMedicationViewModel : ViewModel() {
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage
 
-    fun addMedication(name: String, category: String, dosage: String, onComplete: () -> Unit) {
+    fun addMedication(
+        name: String,
+        category: String,
+        dosage: String,
+        instructions: String,
+        imageBytes: ByteArray? = null,
+        onComplete: () -> Unit
+    ) {
         val trimmedName = name.trim()
         val trimmedDosage = dosage.trim()
         
@@ -33,19 +40,37 @@ class AddMedicationViewModel : ViewModel() {
             _isSaving.value = true
             _errorMessage.value = null
             try {
-                withTimeout(15000) { // 15 second timeout
-                    val medication = MedicationModel(
-                        name = trimmedName,
-                        category = category.trim(),
-                        defaultDosage = trimmedDosage
-                    )
-                    repository.addMedication(medication)
+                val currentUser = SupabaseProvider.client.auth.currentUserOrNull()
+                val userId = currentUser?.id
+
+                if (userId == null) {
+                    _errorMessage.value = "You must be logged in to add medication"
+                    _isSaving.value = false
+                    return@launch
                 }
+
+                var imageUrl: String? = null
+                if (imageBytes != null) {
+                    val fileName = "med_${userId}_${System.currentTimeMillis()}.jpg"
+                    imageUrl = repository.uploadMedicationImage(fileName, imageBytes)
+                }
+
+                val medication = MedicationModel(
+                    name = trimmedName,
+                    category = category.trim(),
+                    defaultDosage = trimmedDosage,
+                    instructions = instructions.trim(),
+                    userId = userId,
+                    imageUrl = imageUrl
+                )
+                
+                repository.addMedication(medication)
+                
                 _isSaving.value = false
                 onComplete()
             } catch (e: Exception) {
                 _isSaving.value = false
-                _errorMessage.value = "Error: ${e.localizedMessage ?: "Connection failed"}"
+                _errorMessage.value = "Failed to save: ${e.localizedMessage ?: "Unknown error"}"
                 e.printStackTrace()
             }
         }

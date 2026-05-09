@@ -23,6 +23,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -38,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.cw.ProFit.ui.theme.primaryColor
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,7 +54,7 @@ fun SettingsScreen(navController: NavHostController) {
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Blue,
+                    containerColor = primaryColor,
                     titleContentColor = Color.White,
                     navigationIconContentColor = Color.White
                 )
@@ -69,7 +71,7 @@ fun SettingsScreen(navController: NavHostController) {
             Text(
                 text = "Account Settings",
                 style = MaterialTheme.typography.titleLarge,
-                color = Color.Blue,
+                color = primaryColor,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
@@ -89,7 +91,7 @@ fun SettingsScreen(navController: NavHostController) {
             Text(
                 text = "Notifications",
                 style = MaterialTheme.typography.titleLarge,
-                color = Color.Blue,
+                color = primaryColor,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
@@ -114,7 +116,7 @@ fun SettingsScreen(navController: NavHostController) {
             Text(
                 text = "About",
                 style = MaterialTheme.typography.titleLarge,
-                color = Color.Blue,
+                color = primaryColor,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
@@ -144,7 +146,7 @@ fun SettingsItem(icon: ImageVector, title: String, subtitle: String) {
             imageVector = icon,
             contentDescription = null,
             modifier = Modifier.size(24.dp),
-            tint = Color.Gray
+            tint = primaryColor.copy(alpha = 0.7f)
         )
         Spacer(modifier = Modifier.width(16.dp))
         Column {
@@ -166,11 +168,20 @@ fun SettingsToggleItem(icon: ImageVector, title: String, state: Boolean, onToggl
             imageVector = icon,
             contentDescription = null,
             modifier = Modifier.size(24.dp),
-            tint = Color.Gray
+            tint = primaryColor.copy(alpha = 0.7f)
         )
         Spacer(modifier = Modifier.width(16.dp))
         Text(text = title, fontSize = 18.sp, color = Color.Black, modifier = Modifier.weight(1.0f))
-        Switch(checked = state, onCheckedChange = onToggle)
+        Switch(
+            checked = state, 
+            onCheckedChange = onToggle,
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = Color.White,
+                checkedTrackColor = primaryColor,
+                uncheckedThumbColor = Color.LightGray,
+                uncheckedTrackColor = Color.Gray.copy(alpha = 0.3f)
+            )
+        )
     }
 }
 

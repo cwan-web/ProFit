@@ -89,6 +89,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation("io.coil-kt:coil-compose:2.6.0")
     implementation(libs.androidx.navigation.runtime.ktx)
     implementation(libs.play.services.auth)
     testImplementation(libs.junit)

@@ -3,19 +3,23 @@ package com.cw.ProFit.ui.screens
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
 import com.cw.ProFit.data.SupabaseProvider
 import com.cw.ProFit.data.models.MedicationModel
 import com.cw.ProFit.data.repository.MedicineRepository
@@ -58,6 +62,11 @@ class MedicationListViewModel : ViewModel() {
 fun MedicationListScreen(onBack: () -> Unit, viewModel: MedicationListViewModel = viewModel()) {
     val medications by viewModel.medications.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+
+    // Refresh the list whenever this screen is displayed
+    LaunchedEffect(Unit) {
+        viewModel.fetchMedications()
+    }
 
     Scaffold(
         topBar = {
@@ -111,26 +120,50 @@ fun MedicationCard(medication: MedicationModel) {
         elevation = CardDefaults.cardElevation(4.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = medication.name,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                color = primaryColor
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(text = "Category: ", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
-                Text(text = medication.category ?: "N/A", fontSize = 14.sp)
+        Row(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Display Image if available
+            if (!medication.imageUrl.isNullOrBlank()) {
+                AsyncImage(
+                    model = medication.imageUrl,
+                    contentDescription = medication.name,
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clip(RoundedCornerShape(8.dp)),
+                    contentScale = ContentScale.Crop
+                )
+                Spacer(modifier = Modifier.width(16.dp))
             }
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(text = "Dosage: ", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
-                Text(text = medication.defaultDosage ?: "N/A", fontSize = 14.sp)
-            }
-            if (!medication.instructions.isNullOrBlank()) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(text = "Instructions:", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
-                Text(text = medication.instructions, fontSize = 14.sp, color = Color.DarkGray)
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = medication.name,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = primaryColor
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(text = "Category: ", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                    Text(text = medication.category ?: "N/A", fontSize = 14.sp)
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(text = "Dosage: ", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                    Text(text = medication.defaultDosage ?: "N/A", fontSize = 14.sp)
+                }
+                if (!medication.instructions.isNullOrBlank()) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = medication.instructions,
+                        fontSize = 12.sp,
+                        color = Color.DarkGray,
+                        maxLines = 2
+                    )
+                }
             }
         }
     }

@@ -1,15 +1,26 @@
 package com.cw.ProFit.ui.screens.authentication.register
 
-import com.cw.ProFit.R
-import com.cw.ProFit.ui.screens.authentication.forgotpassword.LottieAnimationWidget
-import com.cw.ProFit.ui.theme.primaryColor
-import com.cw.ProFit.ui.theme.secondaryColor
-import android.R.attr.maxLines
-import android.R.attr.shape
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Email
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -17,75 +28,59 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.TextFieldValue
-import android.R.attr.text
-import android.provider.ContactsContract
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Email
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Text
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.cw.ProFit.R
+import com.cw.ProFit.ui.screens.authentication.forgotpassword.LottieAnimationWidget
+import com.cw.ProFit.ui.theme.primaryColor
+import com.cw.ProFit.ui.theme.secondaryColor
 
-
-
-
-
-
-
-
-
+import androidx.compose.foundation.layout.size
+import androidx.compose.runtime.collectAsState
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.cw.ProFit.data.models.UserModel
 
 @Composable
-fun RegisterScreen(onNavigateToLogin : () -> Unit, onRegisterSuccess: () -> Unit, modifier: Modifier = Modifier) {
+fun RegisterScreen(
+    onNavigateToLogin: () -> Unit,
+    onRegisterSuccess: () -> Unit,
+    modifier: Modifier = Modifier,
+    viewModel: RegisterViewModel = viewModel()
+) {
     //text Input
     var emailInput by remember { mutableStateOf(TextFieldValue("")) }
     var passwordInput by remember { mutableStateOf(TextFieldValue("")) }
     var isVisible by remember { mutableStateOf(false) }
-    var userName  by remember { mutableStateOf(TextFieldValue(""))}
+    var userName by remember { mutableStateOf(TextFieldValue("")) }
+
+    val isLoading by viewModel.isLoading.collectAsState()
+    val message by viewModel.message.collectAsState()
 
     Column(
-
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
             .fillMaxSize()
-
+            .padding(16.dp)
     ) {
+        // ... rest of the code ...
 
         //lottie aniamtion
         LottieAnimationWidget(R.raw.mandoingdumbellcurls, 300.dp)
 
-        Text(text = "Already have an account? Sign In ",modifier = Modifier.clickable{ onNavigateToLogin()})
-
 
         // sIGNuP MESSAGE
         Text(
-            text = "Sign UP",
+            text = "Create an Account",
             style = TextStyle(
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
@@ -93,18 +88,30 @@ fun RegisterScreen(onNavigateToLogin : () -> Unit, onRegisterSuccess: () -> Unit
             )
         )
         Spacer(modifier = Modifier.height(24.dp))
+        
         //username
         OutlinedTextField(
             value = userName,
             onValueChange = { userName = it },
-            label = { Text("userName")}
-
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Outlined.Person,
+                    contentDescription = "User Name",
+                    tint = primaryColor
+                )
+            },
+            placeholder = {
+                Text(text = "Username")
+            },
+            maxLines = 1,
+            shape = RoundedCornerShape(24.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = secondaryColor,
+                unfocusedBorderColor = primaryColor
+            ),
+            modifier = Modifier.fillMaxWidth()
         )
-
-
-
-
-
+        Spacer(modifier = Modifier.height(16.dp))
 
         //emailinput
         OutlinedTextField(
@@ -129,9 +136,9 @@ fun RegisterScreen(onNavigateToLogin : () -> Unit, onRegisterSuccess: () -> Unit
             ),
             modifier = Modifier.fillMaxWidth()
         )
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
+        
         //password input
-
         OutlinedTextField(
             value = passwordInput,
             onValueChange = { passwordInput = it },
@@ -152,20 +159,19 @@ fun RegisterScreen(onNavigateToLogin : () -> Unit, onRegisterSuccess: () -> Unit
                 PasswordVisualTransformation()
             },
 
-
             trailingIcon = {
                 IconButton(
-                    onClick = { var isViisble = !isVisible }
+                    onClick = { isVisible = !isVisible }
                 ) {
                     if (isVisible) {
                         Icon(
                             imageVector = ImageVector.vectorResource(R.drawable.outline_visibility_24),
-                            contentDescription = "Password"
+                            contentDescription = "Hide Password"
                         )
                     } else {
                         Icon(
                             imageVector = ImageVector.vectorResource(R.drawable.outline_visibility_off_24),
-                            contentDescription = "Password"
+                            contentDescription = "Show Password"
                         )
                     }
 
@@ -181,26 +187,42 @@ fun RegisterScreen(onNavigateToLogin : () -> Unit, onRegisterSuccess: () -> Unit
 
         )
         Spacer(modifier = Modifier.height(24.dp))
+        
+        if (message.isNotEmpty()) {
+            Text(text = message, color = if (message.contains("success")) primaryColor else androidx.compose.ui.graphics.Color.Red)
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+
         //button
         OutlinedButton(
-            onClick = { }
+            onClick = { 
+                val user = UserModel(email = emailInput.text, password = passwordInput.text)
+                viewModel.registerUser(user, userName.text, onRegisterSuccess)
+            },
+            enabled = !isLoading
         )
         {
-            Text(
-                "Sign in",
-                modifier = Modifier.padding(horizontal = 24.dp)
-            )
+            if (isLoading) {
+                CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+            } else {
+                Text(
+                    "Sign Up",
+                    modifier = Modifier.padding(horizontal = 24.dp)
+                )
+            }
         }
         Spacer(modifier = Modifier.height(24.dp))
+        
         //row
-        Row() {
-
-            Text(text = "Login in")
-
-
-
+        Row {
+            Text(text = "Already have an account?")
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = "Log In",
+                color = primaryColor,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.clickable { onNavigateToLogin() }
+            )
         }
     }
 }
-
-

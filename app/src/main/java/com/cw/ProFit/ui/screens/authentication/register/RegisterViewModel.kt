@@ -8,39 +8,29 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-sealed class RegisterUiState(
-    val isLoading: Boolean = false,
-    val isSuccess: Boolean = false,
-    val error: String? = null
-)
+class RegisterViewModel : ViewModel() {
 
-class RegisterViewModel(_isLoading: Any) : ViewModel() {
+    private val authRepository = AuthRepository()
 
-    val authRepository = AuthRepository()
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading = _isLoading.asStateFlow()
 
-    //     state
-
-    private var _isLoading = MutableStateFlow(false)
-    val isLoading = _isLoading.toString()
-
-    private var _message = MutableStateFlow("")
+    private val _message = MutableStateFlow("")
     val message = _message.asStateFlow()
 
-
-    //     methods
-    fun registerUser(userModel: UserModel) {
+    fun registerUser(userModel: UserModel, fullName: String, onRegisterSuccess: () -> Unit) {
         _isLoading.value = true
+        _message.value = ""
         viewModelScope.launch {
-
             try {
-                authRepository.registerUser(userModel)
-                _isLoading.value =false
-                _message.value="success!"
-            }catch (e:Error){
-                _isLoading.value =false
-                _message.value="Oops! Something went wrong:${e.message}"
+                authRepository.registerUser(userModel, fullName)
+                _isLoading.value = false
+                _message.value = "Registration successful!"
+                onRegisterSuccess()
+            } catch (e: Exception) {
+                _isLoading.value = false
+                _message.value = "Registration failed: ${e.message}"
             }
-
         }
     }
 }

@@ -3,15 +3,16 @@ package com.cw.ProFit.ui.screens.authentication.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.cw.ProFit.data.SupabaseProvider
 import com.cw.ProFit.data.models.MedicationModel
 import com.cw.ProFit.data.repository.MedicineRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow // FOR BETTER STATE MANAGEMENT
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlin.collections.emptyList
 
-class HomeScreenViewModel(private val repository: MedicineRepository) : ViewModel() {
+class HomeScreenViewModel : ViewModel() {
+    private val repository = MedicineRepository(SupabaseProvider.client)
 
     // 1. Private mutable state
     private val _medications = MutableStateFlow<List<MedicationModel>>(emptyList())
