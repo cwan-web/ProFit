@@ -36,14 +36,3 @@ class HomeScreenViewModel : ViewModel() {
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-//    methods

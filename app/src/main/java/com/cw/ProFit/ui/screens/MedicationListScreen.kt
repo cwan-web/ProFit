@@ -38,6 +38,9 @@ class MedicationListViewModel : ViewModel() {
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
+    private val _errorMessage = MutableStateFlow<String?>(null)
+    val errorMessage: StateFlow<String?> = _errorMessage
+
     init {
         fetchMedications()
     }
@@ -45,10 +48,12 @@ class MedicationListViewModel : ViewModel() {
     fun fetchMedications() {
         viewModelScope.launch {
             _isLoading.value = true
+            _errorMessage.value = null
             try {
                 val list = repository.getMedications()
                 _medications.value = list
             } catch (e: Exception) {
+                _errorMessage.value = "Failed to load: ${e.localizedMessage ?: "Unknown error"}"
                 e.printStackTrace()
             } finally {
                 _isLoading.value = false
@@ -62,6 +67,7 @@ class MedicationListViewModel : ViewModel() {
 fun MedicationListScreen(onBack: () -> Unit, viewModel: MedicationListViewModel = viewModel()) {
     val medications by viewModel.medications.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+    val errorMessage by viewModel.errorMessage.collectAsState()
 
     // Refresh the list whenever this screen is displayed
     LaunchedEffect(Unit) {
@@ -92,6 +98,16 @@ fun MedicationListScreen(onBack: () -> Unit, viewModel: MedicationListViewModel 
         ) {
             if (isLoading) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center), color = primaryColor)
+            } else if (errorMessage != null) {
+                Column(
+                    modifier = Modifier.align(Alignment.Center),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(text = errorMessage!!, color = Color.Red)
+                    Button(onClick = { viewModel.fetchMedications() }, modifier = Modifier.padding(top = 8.dp)) {
+                        Text("Retry")
+                    }
+                }
             } else if (medications.isEmpty()) {
                 Text(
                     text = "No medications found",
