@@ -37,21 +37,27 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavHostController
 import com.cw.ProFit.R
 import com.cw.ProFit.ui.screens.authentication.forgotpassword.LottieAnimationWidget
 import com.cw.ProFit.ui.theme.primaryColor
 import com.cw.ProFit.ui.theme.secondaryColor
+import com.cw.ProFit.data.models.UserModel
 
 
 @Composable
 fun LoginScreen(onNavigateToRegister : () -> Unit, onNavigateToForgotPassword: () -> Unit, onLoginSuccess: () -> Unit,
-                modifier: Modifier =Modifier) {
+                modifier: Modifier =Modifier, viewModel: LoginViewModel = viewModel()) {
     //text Input
     var emailInput by remember { mutableStateOf(TextFieldValue("")) }
     var passwordInput by remember { mutableStateOf(TextFieldValue("")) }
     var isVisible by remember { mutableStateOf(false) }
+
+    val isLoading by viewModel.isLoading.collectAsState()
+    val message by viewModel.message.collectAsState()
 
     Column(
         verticalArrangement = Arrangement.Center,
@@ -152,15 +158,32 @@ fun LoginScreen(onNavigateToRegister : () -> Unit, onNavigateToForgotPassword: (
 
         )
         Spacer(modifier = Modifier.height(24.dp))
+
+        if (message.isNotEmpty()) {
+            Text(
+                text = message,
+                color = if (message.contains("success")) primaryColor else androidx.compose.ui.graphics.Color.Red,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+        }
+
         //button
         OutlinedButton(
-            onClick = { onLoginSuccess() }
+            onClick = { 
+                val user = UserModel(email = emailInput.text, password = passwordInput.text)
+                viewModel.loginUser(user, onLoginSuccess)
+            },
+            enabled = !isLoading
         )
         {
-            Text(
-                "Log In",
-                modifier = Modifier.padding(horizontal = 24.dp)
-            )
+            if (isLoading) {
+                CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+            } else {
+                Text(
+                    "Log In",
+                    modifier = Modifier.padding(horizontal = 24.dp)
+                )
+            }
         }
         Spacer(modifier = Modifier.height(24.dp))
         //row
