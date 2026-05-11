@@ -1,5 +1,6 @@
 package com.cw.ProFit.ui.screens
 
+import android.app.TimePickerDialog
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -33,6 +34,10 @@ fun AddMedicationScreen(onBack: () -> Unit, viewModel: AddMedicationViewModel = 
     var category by remember { mutableStateOf("") }
     var dosage by remember { mutableStateOf("") }
     var instructions by remember { mutableStateOf("") }
+    
+    // Reminder state
+    var reminderEnabled by remember { mutableStateOf(false) }
+    var reminderTime by remember { mutableStateOf("Set Time") }
     
     // Image selection state
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
@@ -134,6 +139,55 @@ fun AddMedicationScreen(onBack: () -> Unit, viewModel: AddMedicationViewModel = 
                 minLines = 3
             )
 
+            // Reminder Toggle and Time Picker
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = Color.LightGray.copy(alpha = 0.2f))
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text("Set Reminder", style = MaterialTheme.typography.bodyLarge)
+                        Switch(
+                            checked = reminderEnabled,
+                            onCheckedChange = { reminderEnabled = it },
+                            enabled = !isSaving
+                        )
+                    }
+
+                    if (reminderEnabled) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text("Time:", style = MaterialTheme.typography.bodyMedium)
+                            TextButton(
+                                onClick = {
+                                    val calendar = java.util.Calendar.getInstance()
+                                    TimePickerDialog(
+                                        context,
+                                        { _, hour, minute ->
+                                            reminderTime = String.format("%02d:%02d", hour, minute)
+                                        },
+                                        calendar.get(java.util.Calendar.HOUR_OF_DAY),
+                                        calendar.get(java.util.Calendar.MINUTE),
+                                        true
+                                    ).show()
+                                },
+                                enabled = !isSaving
+                            ) {
+                                Text(reminderTime, color = primaryColor)
+                            }
+                        }
+                    }
+                }
+            }
+
             errorMessage?.let {
                 Text(text = it, color = Color.Red, modifier = Modifier.padding(top = 8.dp))
             }
@@ -150,7 +204,15 @@ fun AddMedicationScreen(onBack: () -> Unit, viewModel: AddMedicationViewModel = 
                             null
                         }
                     }
-                    viewModel.addMedication(name, category, dosage, instructions, imageBytes) {
+                    viewModel.addMedication(
+                        name,
+                        category,
+                        dosage,
+                        instructions,
+                        imageBytes,
+                        if (reminderEnabled) reminderTime else null,
+                        reminderEnabled
+                    ) {
                         onBack()
                     }
                 },

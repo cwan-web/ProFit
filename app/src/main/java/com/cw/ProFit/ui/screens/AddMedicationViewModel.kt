@@ -26,6 +26,8 @@ class AddMedicationViewModel : ViewModel() {
         dosage: String,
         instructions: String,
         imageBytes: ByteArray? = null,
+        reminderTime: String? = null,
+        reminderEnabled: Boolean = false,
         onComplete: () -> Unit
     ) {
         val trimmedName = name.trim()
@@ -61,10 +63,16 @@ class AddMedicationViewModel : ViewModel() {
                     defaultDosage = trimmedDosage,
                     instructions = instructions.trim(),
                     userId = userId,
-                    imageUrl = imageUrl
+                    imageUrl = imageUrl,
+                    reminderTime = reminderTime,
+                    reminderEnabled = reminderEnabled
                 )
                 
                 repository.addMedication(medication)
+                
+                if (reminderEnabled && reminderTime != null) {
+                    sendMedicationReminderNotification(currentUser.email, trimmedName, reminderTime)
+                }
                 
                 _isSaving.value = false
                 onComplete()
@@ -74,6 +82,14 @@ class AddMedicationViewModel : ViewModel() {
                 e.printStackTrace()
             }
         }
+    }
+
+    private fun sendMedicationReminderNotification(email: String?, medicationName: String, time: String) {
+        // In a production app, you would use a backend service or an email API (like SendGrid or Mailgun)
+        // Or if you want to send locally via SMS/Email intents or WorkManager
+        // For now, we simulate the action or log it.
+        println("PROFIT_LOG: Sending medication reminder to $email for $medicationName at $time")
+        // Implementation for actual email/message sending would go here
     }
     
     fun clearError() {

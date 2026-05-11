@@ -15,6 +15,10 @@ data class MedicationModel(
     val userId: String? = null,
     @SerialName("image_url")
     val imageUrl: String? = null,
+    @SerialName("reminder_time")
+    val reminderTime: String? = null,
+    @SerialName("reminder_enabled")
+    val reminderEnabled: Boolean = false,
     @SerialName("created_at")
     val createdAt: String? = null
 )
